@@ -1,10 +1,15 @@
 const express = require('express')
-const sqlite = require('sqlite3').verbose()
+const cors = require('cors')
+
 
 const app = express()
 
+// Allow CORS
+app.use(cors())
+
 // Open database
-let db = new sqlite.Database('../craigslistVehicles.db', sqlite.OPEN_READONLY,
+const sqlite = require('sqlite3').verbose()
+let db = new sqlite.Database('./craigslistVehicles.db', sqlite.OPEN_READONLY,
   err => {
     if (err) {
       console.error(err.message)
@@ -13,12 +18,18 @@ let db = new sqlite.Database('../craigslistVehicles.db', sqlite.OPEN_READONLY,
   }
 )
 
-let sql = `
-  SELECT *
-  FROM Vehicle
-  LIMIT 1000`
 
-app.get('/', (req, res) => {
+app.get('/vehicles', (req, res) => {
+  if (!req.query.id) {
+    res.status(400);
+    console.log("no ID")
+  }
+
+  let sql = `
+    SELECT *
+    FROM Vehicle
+    LIMIT 1000`
+
   out = []
   db.all(sql, [], (err, rows) => {
     if (err) {
